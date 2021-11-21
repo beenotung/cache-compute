@@ -14,11 +14,65 @@ The output is passed to callback function upon each update.
 
 - Built-in Typescript support
 - 100% tested with ts-mocha
+- No dependencies\*
 
-## Remark
+\*: except tslib to support await for pre-es2017 runtime
 
-Error handling is intentionally not handled by the checker function.
-To handle errors properly, either do application-specific try-catch in the compute function or when calling the checker function.
+## Usage Example
+
+```typescript
+import { makeSyncComputeCacheByArguments } from 'cache-compute'
+
+let users = [
+  { name: 'Alice', birthday: new Date('2000-01-01').getTime() },
+  { name: 'Bob', birthday: new Date('2000-02-02').getTime() },
+]
+
+const YEAR = 1000 * 60 * 60 * 24 * 365.25
+function toProfile(user) {
+  const now = Date.now()
+  return {
+    name: user.name,
+    age: Math.floor((now - user.birthday) / YEAR),
+  }
+}
+
+function updateUser(index, user) {
+  users = [...users]
+  users[index] = { ...users[index], ...user }
+  runSelectors()
+}
+
+let selectors = []
+function runSelectors() {
+  selectors.forEach(fn => fn())
+}
+
+function watchProfile(index) {
+  const watchUsers = profile =>
+    // e.g. push to websocket client
+    console.log({ index, profile })
+  const checkUsers = makeSyncComputeCacheByArguments(toProfile, watchUsers)
+  const selector = () => checkUsers(users[index])
+  selector()
+  selectors.push(selector)
+}
+
+console.log('== init ==')
+watchProfile(0)
+watchProfile(1)
+// will print both user profiles
+
+console.log('== update alice ==')
+updateUser(0, { name: 'Alex' })
+// only print first user profile
+
+console.log('== update bob ==')
+updateUser(1, { name: 'Bobby' })
+// only print second user profile
+```
+
+More example refers to [demo.ts](./example/demo.ts) and [cache-compute.spec.ts](./test/cache-compute.spec.ts)
 
 ## How it works
 
@@ -27,6 +81,11 @@ The input (a.k.a. dependencies) of a function is memorized.
 When the checker function is called, it compares the current input against that last input.
 
 If any of the input is changed, the provided function will be re-run, and the return value will be passed to the callback function.
+
+## Remark
+
+Error handling is intentionally not handled by the checker function.
+To handle errors properly, either do application-specific try-catch in the compute function or when calling the checker function.
 
 ## License
 
