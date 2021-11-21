@@ -9,9 +9,9 @@
     "url": "https://beeno-tung.surge.sh"
   },
   "license": "BSD-2-Clause",
-  "main": "dist/cjs/index.js",
-  "types": "dist/cjs/index.d.ts",
-  "module": "dist/esm/index.js",
+  "main": "dist/cjs/cache-compute.js",
+  "types": "dist/cjs/cache-compute.d.ts",
+  "module": "dist/esm/cache-compute.js",
   "sideEffects": false,
   "scripts": {
     "prepare": "run-p prepare:*",
