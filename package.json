@@ -45,6 +45,9 @@
     "test": "test"
   },
   "files": [
+    "src",
+    "example/package.json",
+    "example/demo.ts",
     "dist"
   ],
   "dependencies": {
