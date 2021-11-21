@@ -7,12 +7,18 @@ The output is passed to callback function upon each update.
 
 ## Main Functions
 
-- Memorize function arguments
+- Memorize variadic function by arguments (compare each argument)
+- Memorize unary function by options object (compare each key-value pairs)
 
-## Feature
+## Features
 
 - Built-in Typescript support
 - 100% tested with ts-mocha
+
+## Remark
+
+Error handling is intentionally not handled by the checker function.
+To handle errors properly, either do application-specific try-catch in the compute function or when calling the checker function.
 
 ## How it works
 
