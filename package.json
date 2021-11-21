@@ -2,7 +2,15 @@
   "name": "cache-compute",
   "version": "0.0.0",
   "description": "Memorize and re-run a function when its arguments are changed",
-  "keywords": [],
+  "keywords": [
+    "cache",
+    "memorize",
+    "compute",
+    "size-effect",
+    "callback",
+    "arguments",
+    "options"
+  ],
   "author": {
     "name": "Beeno Tung",
     "email": "aabbcc1241@yahoo.com.hk",
