@@ -1,6 +1,6 @@
 {
   "name": "cache-compute",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Memorize and re-run a function when its arguments are changed",
   "keywords": [
     "cache",
