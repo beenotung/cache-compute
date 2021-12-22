@@ -3,6 +3,8 @@ import {
   makeAsyncComputeCacheByArguments,
   makeSyncComputeCacheByOptions,
   makeAsyncComputeCacheByOptions,
+  newComputeByArgumentsCachePool,
+  newComputeByOptionsCachePool,
 } from '../src/cache-compute'
 import sinon from 'sinon'
 import { expect } from 'chai'
@@ -177,6 +179,131 @@ describe('cache-compute.ts', () => {
       expect(calls.length).to.equals(2)
       expect(calls[0].args).to.deep.equals([[3, 4]])
       expect(calls[1].args).to.deep.equals([[4, 5]])
+    })
+  })
+
+  context('newComputeByArgumentsCachePool', () => {
+    it('should persist cached state across multiple invoke for sync compute', () => {
+      let computeFn = sinon.fake((a: number, b: number) => a + b)
+      let cachePool = newComputeByArgumentsCachePool(computeFn)
+
+      let callback = sinon.fake()
+
+      let compute1 = cachePool(callback)
+      let compute2 = cachePool(callback)
+
+      expect(callback.notCalled)
+
+      compute1(3, 4)
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2(3, 4)
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2(5, 4)
+
+      expect(callback.calledTwice)
+      expect(computeFn.calledTwice)
+
+      expect(computeFn.getCall(0).returnValue).to.equals(7)
+      expect(computeFn.getCall(1).returnValue).to.equals(9)
+    })
+
+    it('should persist cached async state across multiple invoke for async compute', async () => {
+      let computeFn = sinon.fake(async (a: number, b: number) => a + b)
+      let cachePool = newComputeByArgumentsCachePool(computeFn)
+
+      let callback = sinon.fake()
+
+      let compute1 = cachePool(callback)
+      let compute2 = cachePool(callback)
+
+      expect(callback.notCalled)
+
+      compute1(3, 4)
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2(3, 4)
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2(5, 4)
+
+      expect(callback.calledTwice)
+      expect(computeFn.calledTwice)
+
+      expect(await computeFn.getCall(0).returnValue).to.equals(7)
+      expect(await computeFn.getCall(1).returnValue).to.equals(9)
+    })
+  })
+
+  context('newComputeByOptionsCachePool', () => {
+    type Options = { a: number; b: number }
+    it('should persist cached state across multiple invoke for sync compute', () => {
+      let computeFn = sinon.fake(({ a, b }: Options) => a + b)
+      let cachePool = newComputeByOptionsCachePool(computeFn)
+
+      let callback = sinon.fake()
+
+      let compute1 = cachePool(callback)
+      let compute2 = cachePool(callback)
+
+      expect(callback.notCalled)
+
+      compute1({ a: 3, b: 4 })
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2({ a: 3, b: 4 })
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2({ a: 5, b: 4 })
+
+      expect(callback.calledTwice)
+      expect(computeFn.calledTwice)
+
+      expect(computeFn.getCall(0).returnValue).to.equals(7)
+      expect(computeFn.getCall(1).returnValue).to.equals(9)
+    })
+
+    it('should persist cached async state across multiple invoke for async compute', async () => {
+      let computeFn = sinon.fake(async ({ a, b }: Options) => a + b)
+      let cachePool = newComputeByOptionsCachePool(computeFn)
+
+      let callback = sinon.fake()
+
+      let compute1 = cachePool(callback)
+      let compute2 = cachePool(callback)
+
+      expect(callback.notCalled)
+
+      compute1({ a: 3, b: 4 })
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2({ a: 3, b: 4 })
+
+      expect(callback.calledOnce)
+      expect(computeFn.calledOnce)
+
+      compute2({ a: 5, b: 4 })
+
+      expect(callback.calledTwice)
+      expect(computeFn.calledTwice)
+
+      expect(await computeFn.getCall(0).returnValue).to.equals(7)
+      expect(await computeFn.getCall(1).returnValue).to.equals(9)
     })
   })
 })

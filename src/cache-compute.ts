@@ -97,3 +97,38 @@ export function makeAsyncComputeCacheByOptions<Options extends object, R>(
   }
   return check as (options: Options) => Promise<void>
 }
+
+export type Callback<T> = (result: T) => void
+
+export function newComputeByArgumentsCachePool<
+  F extends(...args: any[]) => any,
+>(computeFn: F) {
+  const cache = new WeakMap<
+    Callback<ReturnType<F>>,
+    (...args: Parameters<F>) => void
+  >()
+  function cacheCompute(callback: Callback<ReturnType<F>>) {
+    let compute = cache.get(callback)
+    if (!compute) {
+      compute = makeSyncComputeCacheByArguments(computeFn, callback)
+      cache.set(callback, compute)
+    }
+    return compute
+  }
+  return cacheCompute
+}
+
+export function newComputeByOptionsCachePool<Options extends object, R>(
+  computeFn: (options: Options) => R,
+) {
+  const cache = new WeakMap<Callback<R>, (options: Options) => void>()
+  function cacheCompute(callback: Callback<R>) {
+    let compute = cache.get(callback)
+    if (!compute) {
+      compute = makeSyncComputeCacheByOptions(computeFn, callback)
+      cache.set(callback, compute)
+    }
+    return compute
+  }
+  return cacheCompute
+}
